@@ -1,28 +1,27 @@
 //
-//  ViewController.swift
+//  TableViewController.swift
 //  On The Map
 //
-//  Created by Chris Bacon on 2015-09-26.
+//  Created by Chris Bacon on 2015-09-27.
 //  Copyright © 2015 BaconCo. All rights reserved.
 //
 
 import UIKit
-import MapKit
 
-class MapViewController: UIViewController, MKMapViewDelegate {
+class TableViewController: UITableViewController {
 
-    @IBOutlet weak var mapView: MKMapView!
-
+    var people: [Person] = [Person]()
     
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
-    
-        getPins()
         
     }
     
-    func getPins(){
+    override func viewWillAppear(animated: Bool) {
+        
+        super.viewWillAppear(animated)
+        
         let request = NSMutableURLRequest(URL: NSURL(string: "https://api.parse.com/1/classes/StudentLocation")!)
         request.addValue("QrX47CA9cyuGewLdsL7o5Eb8iug6Em8ye0dnAbIr", forHTTPHeaderField: "X-Parse-Application-Id")
         request.addValue("QuWThTdiRmTux3YaDseUSEpUKo7aBYM737yKd4gY", forHTTPHeaderField: "X-Parse-REST-API-Key")
@@ -54,39 +53,48 @@ class MapViewController: UIViewController, MKMapViewDelegate {
                 return
             }
             
-            for pin in results{
-                
-                let coordinates = CLLocationCoordinate2D(latitude: CLLocationDegrees(pin["latitude"] as! Double!), longitude: CLLocationDegrees(pin["longitude"] as! Double!))
-                let pinn = MKPointAnnotation()
-                
-                let first = pin["firstName"] as! String
-                let last = pin["lastName"] as! String
-                let mediaURL = pin["mediaURL"] as! String
-                pinn.title = "\(first) \(last)"
-                pinn.subtitle = mediaURL
-                
-                pinn.coordinate = coordinates
-                
-                dispatch_async(dispatch_get_main_queue()) {
-                    self.mapView.addAnnotation(pinn)
-                }
+            self.people = Person.peopleFromResults(results)
+            
+            print(self.people)
+            
+            
+            dispatch_async(dispatch_get_main_queue()) {
+                self.tableView.reloadData()
             }
         }
         
         task.resume()
-    }
-    
-
-    
-    func mapView(mapView: MKMapView, annotationView: MKAnnotationView, calloutAccessoryControlTapped control: UIControl) {
         
-        if control == annotationView.rightCalloutAccessoryView {
-            let app = UIApplication.sharedApplication()
-            app.openURL(NSURL(string: annotationView.annotation!.subtitle!!)!)
-            
-            print("...click click...")
-        }
+        
     }
+    
+        
+    override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
+        /* Get cell type */
+        let cellReuseIdentifier = "cell"
+        let person = people[indexPath.row]
+        let cell = tableView.dequeueReusableCellWithIdentifier(cellReuseIdentifier) as UITableViewCell!
+        
+        cell.textLabel!.text = person.firstName + " " + person.lastName
+        cell.detailTextLabel!.text = person.mediaURL
 
+
+        return cell
+    }
+    
+    override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return people.count
+    }
+    
+//    override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
+//        
+//        /* Push the movie detail view */
+//        let controller = self.storyboard!.instantiateViewControllerWithIdentifier("MovieDetailViewController") as! MovieDetailViewController
+//        controller.movie = movies[indexPath.row]
+//        self.navigationController!.pushViewController(controller, animated: true)
+//    }
+    
+    
 }
+
 
