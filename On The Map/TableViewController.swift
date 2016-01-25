@@ -8,91 +8,89 @@
 
 import UIKit
 
-class TableViewController: UITableViewController {
+class TableViewController: UIViewController, UITableViewDelegate, UITableViewDataSource  {
 
-    var people: [Person] = [Person]()
+    @IBOutlet weak var tableView: UITableView!
     
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
         
     }
-    
+
     override func viewWillAppear(animated: Bool) {
         
-        super.viewWillAppear(animated)
-        
-        let request = NSMutableURLRequest(URL: NSURL(string: "https://api.parse.com/1/classes/StudentLocation")!)
-        request.addValue("QrX47CA9cyuGewLdsL7o5Eb8iug6Em8ye0dnAbIr", forHTTPHeaderField: "X-Parse-Application-Id")
-        request.addValue("QuWThTdiRmTux3YaDseUSEpUKo7aBYM737yKd4gY", forHTTPHeaderField: "X-Parse-REST-API-Key")
-        let session = NSURLSession.sharedSession()
-        let task = session.dataTaskWithRequest(request) { data, response, error in
-            if error != nil { // Handle error...
-                return
-            }
-            
-            /* GUARD: Was there any data returned? */
-            guard let data = data else {
-                print("No data was returned by the request!")
-                return
-            }
-            
-            /* 5. Parse the data */
-            let parsedResult: AnyObject!
-            do {
-                parsedResult = try NSJSONSerialization.JSONObjectWithData(data, options: .AllowFragments)
-            } catch {
-                parsedResult = nil
-                print("Could not parse the data as JSON: '\(data)'")
-                return
-            }
-            
-            /* GUARD: Is the "results" key in parsedResult? */
-            guard let results = parsedResult["results"] as? [[String : AnyObject]] else {
-                print("Cannot find key 'results' in \(parsedResult)")
-                return
-            }
-            
-            self.people = Person.peopleFromResults(results)
-            
-            print(self.people)
-            
-            
-            dispatch_async(dispatch_get_main_queue()) {
-                self.tableView.reloadData()
+        Person.sharedInstance.getStudentLocations() { success, errorMessage in
+            if success {
+                dispatch_async(dispatch_get_main_queue()) {
+                    self.tableView.reloadData()
+                }
+            } else {
+                //Display error message
+                let alert = UIAlertController(title: "Error", message: errorMessage, preferredStyle: UIAlertControllerStyle.Alert)
+                let dismissAction = UIAlertAction(title: "OK", style: .Default) { (action) in
+                    
+                }
+                alert.addAction(dismissAction)
+                dispatch_async(dispatch_get_main_queue()) {
+                    self.presentViewController(alert, animated: true, completion: nil)
+                }
             }
         }
+    }
+    @IBAction func addPin(sender: AnyObject) {
+        let infoPostController = self.storyboard?.instantiateViewControllerWithIdentifier("LinkPostViewController") as! LinkPostViewController
         
-        task.resume()
-        
-        
+        self.presentViewController(infoPostController, animated: true, completion: nil)
     }
     
-        
-    override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        /* Get cell type */
+    @IBAction func logOut(sender: AnyObject) {
+        User.sharedInstance.logout() { success, error in
+            if success == true {
+                dispatch_async(dispatch_get_main_queue()) {
+                    let loginController = self.storyboard?.instantiateViewControllerWithIdentifier("LoginViewController") as! LoginViewController
+                    
+                    self.dismissViewControllerAnimated(true, completion: nil)
+                }
+            } else {
+                let alert = UIAlertController(title: "Error", message: error, preferredStyle: UIAlertControllerStyle.Alert)
+                let dismissAction = UIAlertAction(title: "OK", style: .Default) { (action) in
+                    
+                }
+                alert.addAction(dismissAction)
+                dispatch_async(dispatch_get_main_queue()) {
+                    self.presentViewController(alert, animated: true, completion: nil)
+                }
+            }
+        }
+    }
+    
+    func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         let cellReuseIdentifier = "cell"
-        let person = people[indexPath.row]
-        let cell = tableView.dequeueReusableCellWithIdentifier(cellReuseIdentifier) as UITableViewCell!
+        let cell = tableView.dequeueReusableCellWithIdentifier(cellReuseIdentifier)! as UITableViewCell
         
-        cell.textLabel!.text = person.firstName + " " + person.lastName
-        cell.detailTextLabel!.text = person.mediaURL
-
-
+        let location = Person.sharedInstance.locations[indexPath.row]
+        
+        cell.textLabel?.text = "\(location.firstName) \(location.lastName)"
+        cell.detailTextLabel?.text = location.mediaURL
+        
         return cell
     }
     
-    override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return people.count
+    func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return Person.sharedInstance.locations.count
     }
     
-//    override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
-//        
-//        /* Push the movie detail view */
-//        let controller = self.storyboard!.instantiateViewControllerWithIdentifier("MovieDetailViewController") as! MovieDetailViewController
-//        controller.movie = movies[indexPath.row]
-//        self.navigationController!.pushViewController(controller, animated: true)
-//    }
+    func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
+        let location = Person.sharedInstance.locations[indexPath.row]
+        
+        let app = UIApplication.sharedApplication()
+        if let url = NSURL(string: location.mediaURL) {
+            app.openURL( url )
+        } else {
+            print("ERROR: Invalid url")
+        }
+    }
     
     
 }

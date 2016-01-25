@@ -12,81 +12,108 @@ import MapKit
 class MapViewController: UIViewController, MKMapViewDelegate {
 
     @IBOutlet weak var mapView: MKMapView!
-
+    @IBOutlet weak var activityIndicator: UIActivityIndicatorView!
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view, typically from a nib.
-    
-        getPins()
         
+        // Do any additional setup after loading the view.
     }
     
-    func getPins(){
-        let request = NSMutableURLRequest(URL: NSURL(string: "https://api.parse.com/1/classes/StudentLocation")!)
-        request.addValue("QrX47CA9cyuGewLdsL7o5Eb8iug6Em8ye0dnAbIr", forHTTPHeaderField: "X-Parse-Application-Id")
-        request.addValue("QuWThTdiRmTux3YaDseUSEpUKo7aBYM737yKd4gY", forHTTPHeaderField: "X-Parse-REST-API-Key")
-        let session = NSURLSession.sharedSession()
-        let task = session.dataTaskWithRequest(request) { data, response, error in
-            if error != nil { // Handle error...
-                return
-            }
-            
-            /* GUARD: Was there any data returned? */
-            guard let data = data else {
-                print("No data was returned by the request!")
-                return
-            }
-            
-            /* 5. Parse the data */
-            let parsedResult: AnyObject!
-            do {
-                parsedResult = try NSJSONSerialization.JSONObjectWithData(data, options: .AllowFragments)
-            } catch {
-                parsedResult = nil
-                print("Could not parse the data as JSON: '\(data)'")
-                return
-            }
-            
-            /* GUARD: Is the "results" key in parsedResult? */
-            guard let results = parsedResult["results"] as? [[String : AnyObject]] else {
-                print("Cannot find key 'results' in \(parsedResult)")
-                return
-            }
-            
-            for pin in results{
+    override func viewWillAppear(animated: Bool) {
+        activityIndicator.startAnimating()
+        mapView.alpha = 0.4
+        
+        Person.sharedInstance.getStudentLocations() { success, errorMessage in
+            var annotations = [MKPointAnnotation]()
+            if success {
+                for location in Person.sharedInstance.locations {
+                    let lat = CLLocationDegrees(location.latitude)
+                    let long = CLLocationDegrees(location.longitude)
+                    
+                    let coordinate = CLLocationCoordinate2D(latitude: lat, longitude: long)
+                    
+                    let annotation = MKPointAnnotation()
+                    annotation.coordinate = coordinate
+                    annotation.title = "\(location.firstName) \(location.lastName)"
+                    annotation.subtitle = location.mediaURL
+                    
+                    annotations.append(annotation)
+                }
+            } else {
+                //Show error message :(
                 
-                let coordinates = CLLocationCoordinate2D(latitude: CLLocationDegrees(pin["latitude"] as! Double!), longitude: CLLocationDegrees(pin["longitude"] as! Double!))
-                let pinn = MKPointAnnotation()
-                
-                let first = pin["firstName"] as! String
-                let last = pin["lastName"] as! String
-                let mediaURL = pin["mediaURL"] as! String
-                pinn.title = "\(first) \(last)"
-                pinn.subtitle = mediaURL
-                
-                pinn.coordinate = coordinates
-                
+                let alert = UIAlertController(title: "Error", message: errorMessage, preferredStyle: UIAlertControllerStyle.Alert)
+                let dismissAction = UIAlertAction(title: "OK", style: .Default) { (action) in
+                    self.activityIndicator.stopAnimating()
+                    self.activityIndicator.alpha = 0
+                }
+                alert.addAction(dismissAction)
                 dispatch_async(dispatch_get_main_queue()) {
-                    self.mapView.addAnnotation(pinn)
+                    self.presentViewController(alert, animated: true, completion: nil)
+                }
+            }
+            
+            dispatch_async(dispatch_get_main_queue()) {
+                self.mapView.addAnnotations(annotations)
+                self.activityIndicator.stopAnimating()
+                self.activityIndicator.alpha = 0
+                self.mapView.alpha = 1.0
+            }
+        }
+    }
+    
+    @IBAction func createPin(sender: AnyObject) {
+        let infoPostController = self.storyboard?.instantiateViewControllerWithIdentifier("LinkPostViewController") as! LinkPostViewController
+        
+        self.presentViewController(infoPostController, animated: true, completion: nil)
+    }
+    
+    @IBAction func logout(sender: AnyObject) {
+        User.sharedInstance.logout() { success, error in
+            if success == true {
+                dispatch_async(dispatch_get_main_queue()) {
+                    let loginController = self.storyboard?.instantiateViewControllerWithIdentifier("LoginViewController") as! LoginViewController
+                    self.dismissViewControllerAnimated(true, completion: nil)
+                }
+            } else {
+                let alert = UIAlertController(title: "Error", message: error, preferredStyle: UIAlertControllerStyle.Alert)
+                let dismissAction = UIAlertAction(title: "OK", style: .Default) { (action) in
+                    
+                }
+                alert.addAction(dismissAction)
+                dispatch_async(dispatch_get_main_queue()) {
+                    self.presentViewController(alert, animated: true, completion: nil)
                 }
             }
         }
-        
-        task.resume()
     }
     
-
+    func mapView(mapView: MKMapView, viewForAnnotation annotation: MKAnnotation) -> MKAnnotationView? {
+        
+        let reuseId = "pin"
+        
+        var pinView = mapView.dequeueReusableAnnotationViewWithIdentifier(reuseId) as? MKPinAnnotationView
+        
+        if pinView == nil {
+            pinView = MKPinAnnotationView(annotation: annotation, reuseIdentifier: reuseId)
+            pinView!.canShowCallout = true
+            pinView!.pinTintColor = UIColor.greenColor()
+            pinView!.rightCalloutAccessoryView = UIButton(type: .DetailDisclosure)
+        }
+        else {
+            pinView!.annotation = annotation
+        }
+        
+        return pinView
+    }
     
     func mapView(mapView: MKMapView, annotationView: MKAnnotationView, calloutAccessoryControlTapped control: UIControl) {
         
         if control == annotationView.rightCalloutAccessoryView {
-            let app = UIApplication.sharedApplication()
-            app.openURL(NSURL(string: annotationView.annotation!.subtitle!!)!)
-            
-            print("...click click...")
+            let url = NSURL(string: annotationView.annotation!.subtitle!!)
+            UIApplication.sharedApplication().openURL(url!)
         }
     }
-
 }
 
