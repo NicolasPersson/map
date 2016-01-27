@@ -11,7 +11,7 @@ import CoreLocation
 import AddressBook
 import MapKit
 
-class LinkPostViewController: UIViewController, MKMapViewDelegate {
+class LinkPostViewController: UIViewController, MKMapViewDelegate, UITextFieldDelegate {
     
     let geocoder: CLGeocoder = CLGeocoder()
     
@@ -32,11 +32,23 @@ class LinkPostViewController: UIViewController, MKMapViewDelegate {
     var latitude: Double?
     var longitude: Double?
     
+    var tapRecognizer: UITapGestureRecognizer? = nil
+    var keyboardAdjusted = false
+    var lastKeyboardOffset : CGFloat = 0.0
+    
     override func viewDidLoad() {
         super.viewDidLoad()
+        /* Configure the UI */
+        self.configureUI()
+        
+        self.linkInput.delegate = self;
+        self.locationInput.delegate = self;
     }
     
     override func viewWillAppear(animated: Bool) {
+        self.addKeyboardDismissRecognizer()
+        self.subscribeToKeyboardNotifications()
+        
         Person.sharedInstance.queryStudentLocation(User.sharedInstance.userID!) { results, error in
             if let locations = results {
                 if locations.count > 0 {
@@ -186,5 +198,61 @@ class LinkPostViewController: UIViewController, MKMapViewDelegate {
         submit(self)
         return true
     }
-    
+        
 }
+
+/* This code has been added in response to student comments */
+extension LinkPostViewController {
+    func configureUI() {
+        /* Configure tap recognizer */
+        tapRecognizer = UITapGestureRecognizer(target: self, action: "handleSingleTap:")
+        tapRecognizer?.numberOfTapsRequired = 1
+    }
+    
+    func addKeyboardDismissRecognizer() {
+        self.view.addGestureRecognizer(tapRecognizer!)
+    }
+    
+    func removeKeyboardDismissRecognizer() {
+        self.view.removeGestureRecognizer(tapRecognizer!)
+    }
+    
+    func handleSingleTap(recognizer: UITapGestureRecognizer) {
+        self.view.endEditing(true)
+    }
+    
+    func subscribeToKeyboardNotifications() {
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: "keyboardWillShow:", name: UIKeyboardWillShowNotification, object: nil)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: "keyboardWillHide:", name: UIKeyboardWillHideNotification, object: nil)
+    }
+    
+    func unsubscribeToKeyboardNotifications() {
+        NSNotificationCenter.defaultCenter().removeObserver(self, name: UIKeyboardWillShowNotification, object: nil)
+    }
+    
+    func keyboardWillShow(notification: NSNotification) {
+        
+        if keyboardAdjusted == false {
+            lastKeyboardOffset = getKeyboardHeight(notification) / 2
+            self.view.superview?.frame.origin.y -= lastKeyboardOffset
+            keyboardAdjusted = true
+        }
+    }
+    
+    func keyboardWillHide(notification: NSNotification) {
+        
+        if keyboardAdjusted == true {
+            self.view.superview?.frame.origin.y += lastKeyboardOffset
+            keyboardAdjusted = false
+        }
+    }
+    
+    func getKeyboardHeight(notification: NSNotification) -> CGFloat {
+        let userInfo = notification.userInfo
+        let keyboardSize = userInfo![UIKeyboardFrameEndUserInfoKey] as! NSValue // of CGRect
+        return keyboardSize.CGRectValue().height
+    }
+    
+
+}
+

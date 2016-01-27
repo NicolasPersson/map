@@ -276,7 +276,7 @@
                         <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="OnTheMap" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="EtS-xO-2zb">
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="OnTheMap" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="EtS-xO-2zb">
                                 <rect key="frame" x="222" y="99" width="156" height="39"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="32"/>
                                 <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
@@ -306,7 +306,7 @@
                                     <action selector="logIn:" destination="RFk-7U-eiW" eventType="touchUpInside" id="dhz-SL-uEj"/>
                                 </connections>
                             </button>
-                            <label autoresizesSubviews="NO" opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="GOX-t1-SxC">
+                            <label autoresizesSubviews="NO" opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="GOX-t1-SxC">
                                 <rect key="frame" x="300" y="192" width="0.0" height="0.0"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
@@ -323,11 +323,13 @@
                             <constraint firstItem="2Vm-8k-eY1" firstAttribute="top" secondItem="Qhd-rE-2Sn" secondAttribute="bottom" constant="133" id="3gl-Ut-pck"/>
                             <constraint firstItem="2nz-NZ-HA7" firstAttribute="centerX" secondItem="DdE-xm-8Ec" secondAttribute="centerX" id="Bgx-ZM-6qp"/>
                             <constraint firstItem="Qhd-rE-2Sn" firstAttribute="top" secondItem="2nz-NZ-HA7" secondAttribute="bottom" constant="37" id="Jzv-Bb-ZKz"/>
+                            <constraint firstAttribute="width" secondItem="EtS-xO-2zb" secondAttribute="width" id="KCc-0J-HVC"/>
                             <constraint firstItem="Qhd-rE-2Sn" firstAttribute="centerX" secondItem="DdE-xm-8Ec" secondAttribute="centerX" id="KD5-18-BIq"/>
                             <constraint firstItem="EtS-xO-2zb" firstAttribute="top" secondItem="uZW-Bf-xbe" secondAttribute="bottom" constant="79" id="Ka9-Jy-Tbh"/>
                             <constraint firstItem="GOX-t1-SxC" firstAttribute="centerX" secondItem="DdE-xm-8Ec" secondAttribute="centerX" placeholder="YES" id="NVW-z0-rEw"/>
                             <constraint firstItem="IM0-2m-SAw" firstAttribute="centerX" secondItem="DdE-xm-8Ec" secondAttribute="centerX" id="UQa-9n-GD4"/>
                             <constraint firstItem="IM0-2m-SAw" firstAttribute="centerY" secondItem="DdE-xm-8Ec" secondAttribute="centerY" id="WPF-mN-ZhY"/>
+                            <constraint firstItem="GOX-t1-SxC" firstAttribute="leading" secondItem="EtS-xO-2zb" secondAttribute="leading" id="e7q-IA-tHT"/>
                             <constraint firstItem="2nz-NZ-HA7" firstAttribute="top" secondItem="Rno-Ed-Qbl" secondAttribute="bottom" constant="16" id="hJQ-Iw-wLa"/>
                             <constraint firstItem="EtS-xO-2zb" firstAttribute="centerX" secondItem="DdE-xm-8Ec" secondAttribute="centerX" id="nLl-O1-zq9"/>
                             <constraint firstItem="GOX-t1-SxC" firstAttribute="top" secondItem="EtS-xO-2zb" secondAttribute="bottom" constant="54" id="syb-pu-HyW"/>

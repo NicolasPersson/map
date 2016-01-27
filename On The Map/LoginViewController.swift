@@ -8,7 +8,7 @@
 
 import UIKit
 
-class LoginViewController: UIViewController {
+class LoginViewController: UIViewController,UITextFieldDelegate {
 
     // MARK: Properties
     
@@ -35,6 +35,9 @@ class LoginViewController: UIViewController {
         
         /* Configure the UI */
         self.configureUI()
+        
+        self.usernameInput.delegate = self;
+        self.passwordInput.delegate = self;
     }
     
     
@@ -71,12 +74,12 @@ class LoginViewController: UIViewController {
 
                 if error == User.Errors.loginError {
                     // Wrong username or password. Booo!!!!
+                    let alert = UIAlertController(title: "Error", message: "Wrong username or password. Booo", preferredStyle: UIAlertControllerStyle.Alert)
+                    let dismissAction = UIAlertAction(title: "OK", style: .Default) { (action) in }
+                    alert.addAction(dismissAction)
                     dispatch_async(dispatch_get_main_queue()) {
-//                        self.loginSubview.layer.addAnimation( self.shake, forKey:nil )
-                        self.debugText.hidden = false
-                        self.debugText.text = "Wrong username or password. Booo"
+                        self.presentViewController(alert, animated: true, completion: nil)
                     }
-                    
                     self.passwordInput.text = ""
                 } else {
                     let alert = UIAlertController(title: "Error", message: error, preferredStyle: UIAlertControllerStyle.Alert)
@@ -215,6 +218,11 @@ extension LoginViewController {
         let userInfo = notification.userInfo
         let keyboardSize = userInfo![UIKeyboardFrameEndUserInfoKey] as! NSValue // of CGRect
         return keyboardSize.CGRectValue().height
+    }
+    
+    func textFieldShouldReturn(textField: UITextField) -> Bool {
+        self.view.endEditing(true)
+        return false
     }
 }
 

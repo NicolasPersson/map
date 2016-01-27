@@ -111,8 +111,9 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     func mapView(mapView: MKMapView, annotationView: MKAnnotationView, calloutAccessoryControlTapped control: UIControl) {
         
         if control == annotationView.rightCalloutAccessoryView {
-            let url = NSURL(string: annotationView.annotation!.subtitle!!)
-            UIApplication.sharedApplication().openURL(url!)
+            if let url = NSURL(string: annotationView.annotation!.subtitle!!){
+                UIApplication.sharedApplication().openURL(url)
+            }
         }
     }
 }
