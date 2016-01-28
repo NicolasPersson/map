@@ -8,7 +8,7 @@
 
 import Foundation
 
-struct PersonLocation: CustomStringConvertible {
+class PersonLocation : NSObject {
     var objectId: String
     var uniqueKey: String
     var firstName: String
@@ -17,10 +17,6 @@ struct PersonLocation: CustomStringConvertible {
     var mediaURL: String
     var latitude: Float
     var longitude: Float
-    
-    var description: String {
-        return "PersonLocation: \(objectId)-\(uniqueKey)"
-    }
     
     init( dictionary: [String : AnyObject] ) {
         objectId = dictionary[Person.JSONResponseKeys.objectId] as! String
