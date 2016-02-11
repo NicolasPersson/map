@@ -69,7 +69,7 @@ class TableViewController: UIViewController, UITableViewDelegate, UITableViewDat
         let cellReuseIdentifier = "cell"
         let cell = tableView.dequeueReusableCellWithIdentifier(cellReuseIdentifier)! as UITableViewCell
         
-        let location = Person.sharedInstance.locations[indexPath.row]
+        let location = PersonLocation.sharedInstance.locations[indexPath.row]
         
         cell.textLabel?.text = "\(location.firstName) \(location.lastName)"
         cell.detailTextLabel?.text = location.mediaURL
@@ -78,11 +78,11 @@ class TableViewController: UIViewController, UITableViewDelegate, UITableViewDat
     }
     
     func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return Person.sharedInstance.locations.count
+        return PersonLocation.sharedInstance.locations.count
     }
     
     func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
-        let location = Person.sharedInstance.locations[indexPath.row]
+        let location = PersonLocation.sharedInstance.locations[indexPath.row]
         
         let app = UIApplication.sharedApplication()
         if let url = NSURL(string: location.mediaURL) {

@@ -13,10 +13,9 @@ class Person: NSObject {
     //Singleton
     static let sharedInstance = Person()
     
-    var locations: [PersonLocation]
+//    var locations = PersonLocation.sharedInstance.locations
     
     override init() {
-        locations = [PersonLocation]()
         super.init()
     }
     
@@ -56,7 +55,7 @@ class Person: NSObject {
             
             if error == nil {
                 if let results = JSONresults?.valueForKey(JSONResponseKeys.results) as? [[String : AnyObject]] {
-                    self.locations = PersonLocation.locationsFromResults(results)
+                    PersonLocation.locationsFromResults(results)
                     completionHandler( success: true, errorMessage: nil )
                 } else {
                     completionHandler( success: false, errorMessage: Errors.downloadError )

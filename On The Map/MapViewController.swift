@@ -27,7 +27,7 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         Person.sharedInstance.getStudentLocations() { success, errorMessage in
             var annotations = [MKPointAnnotation]()
             if success {
-                for location in Person.sharedInstance.locations {
+                for location in PersonLocation.sharedInstance.locations {
                     let lat = CLLocationDegrees(location.latitude)
                     let long = CLLocationDegrees(location.longitude)
                     
